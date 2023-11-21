@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   fzf locate files in /home or /media folder only
+# depend: fzf mlocate xdg-utils util-linux
+# reqd:   # update system database
+#         sudo updatedb
+#
+#         # optional: include external hdd or other mounted partition to be in the database
+#         1. sudo vim /etc/updatedb.conf
+#         2. Remove /media from PRUNEPATHS
+#         3. sudo updatedb
+
+# only search in /home and /media
+export FZF_DEFAULT_OPTS="-e -i --info=default --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last'"
+locate -ir '\(^/home\|^/media\)/.*' \
+  | fzf -m --prompt="locate >>> select file(s) to open: " \
+  |  while read -r line ; do setsid xdg-open "$line" ; done

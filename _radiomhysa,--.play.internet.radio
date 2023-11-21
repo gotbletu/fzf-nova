@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   fzf internet radio (use playerctl to control)
+# demo:   https://youtu.be/yfREdXs4H5o
+# depend: fzf coreutils util-linux mpv mpv-mpris
+#         wget (for sample csvfile)
+# reff:   get more stations at:
+#         https://www.radiolineup.com/locate/Los-Angeles-CA
+#         https://onlineradiobox.com/us/ktwv
+#         http://laalmanac.com/media/me10.php
+#         https://directory.shoutcast.com
+#         https://zeno.fm/search/radio/?query=80s
+
+### example bindings for mpris
+# amixer set Master toggle                     # Shift-F1 = toggle mute
+# playerctl --player=mpv volume 0.2-           # Shift-F2 = vol down (mpv)
+# playerctl --player=mpv volume 0.2+           # Shift-F3 = vol up (mpv)
+# playerctl --player=mpv stop                  # Shift-F4 = quit/stop/exit (mpv)
+# playerctl --player=mpv shuffle on            # Shift-F5 = shuffle (mpv)
+# playerctl --player=mpv previous              # Shift-F6 = playlist previous (mpv)
+# playerctl --player=mpv play-pause            # Shift-F7 = play/pause (mpv)
+# playerctl --player=mpv next                  # Shift-F8 = playlist next (mpv)
+# playerctl --player=mpv position 5-           # Shift-F9 = seek/rewind (mpv)
+# playerctl --player=mpv position 5+           # Shift-F10 = seek/forward (mpv)
+
+# use pyradio csv if exist, else mkdir and download sample station.csv file
+if [ -f "$HOME/.config/pyradio/stations.csv" ]; then
+  csvfile="$HOME/.config/pyradio/stations.csv"
+elif [ -f "$HOME/.config/radiomhysa/stations.csv" ]; then
+  csvfile="$HOME/.config/radiomhysa/stations.csv"
+else
+  wget -P ~/.config/radiomhysa https://raw.githubusercontent.com/coderholic/pyradio/master/pyradio/stations.csv
+  csvfile="$HOME/.config/radiomhysa/stations.csv"
+fi
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
+mylist() {
+cat <<EOF
+play| -- play internet radio
+edit| -- add/edit radio station
+EOF
+}
+selected="$(mylist | column -s '|' -t | fzf --prompt="radiomhysa: " | cut -d ' ' -f1)"
+[ -z "$selected" ] && exit
+case $selected in
+  play)
+    selected="$(sort -u "$csvfile" \
+      | fzf -d , --with-nth 1 --prompt="radiomhysa >>> select station: " \
+      | cut -d ',' -f2-\
+      )"
+    [ -z "$selected" ] && exit
+    setsid mpv --no-video "$selected" >/dev/null 2>&1 & disown
+    sleep 0.2
+    ;;
+  edit)
+    if [ "$TERM_PROGRAM" = tmux ]; then
+      tmux new-window -n "radiomhysa-edit" "$EDITOR $csvfile"
+    else
+      "$EDITOR" "$csvfile"
+    fi
+    ;;
+esac

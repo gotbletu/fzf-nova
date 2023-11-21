@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   fzf switch to another active window
+# depend: fzf awk wmctrl coreutils
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
+wmctrl -i -a "$(wmctrl -l | awk '! /fzf-nova/ && $2 != "-1" {print $0}' | fzf -d ' ' --with-nth 5.. --prompt="window switcher: " | cut -d' ' -f1)"

@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   control any supported mpris players like mpv, cmus, firefox, chromium
+# depend: fzf coreutils playerctl
+
+mylist() {
+cat <<EOF
+next
+previous
+play-pause
+stop
+shuffle on
+shuffle off
+position 5+
+position 5-
+volume 0.2+
+volume 0.2-
+loop none
+loop track
+loop playlist
+EOF
+}
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
+selected="$(playerctl --list-all | fzf --prompt="playerctl >>> select a player: ")"
+[ -z "$selected" ] && exit
+choice="$(mylist | fzf --prompt="playerctl ($selected) >>> select option: ")"
+[ -z "$choice" ] && exit
+playerctl --player="$selected" "$choice"

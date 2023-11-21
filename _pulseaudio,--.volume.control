@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   control pulseaudio volume
+# depend: fzf coreutils libpulse
+
+mylist() {
+cat <<EOF
+mute toggle
+volume +5%
+volume -5%
+volume 5%
+volume 10%
+volume 15%
+volume 20%
+volume 25%
+volume 30%
+volume 35%
+volume 40%
+volume 45%
+volume 50%
+volume 55%
+volume 60%
+volume 65%
+volume 75%
+volume 80%
+volume 85%
+volume 90%
+volume 95%
+volume 100%
+EOF
+}
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
+selected="$(mylist | fzf --prompt="pulseaudio: ")"
+[ -z "$selected" ] && exit
+name=$(echo "$selected" | cut -f1 -d' ')
+action=$(echo "$selected" | cut -f2 -d' ')
+pactl set-sink-"$name" @DEFAULT_SINK@ "$action"
