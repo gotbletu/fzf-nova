@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   clipmenu clipboard history with fzf
+# demo:   https://youtu.be/9-4boJ9krsY
+# depend: fzf coreutils util-linux procps-ng xsel
+#         clipmenu (https://github.com/cdown/clipmenu)
+# note:   has support for multiline clipboard history
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
+
+mylist() {
+cat <<EOF
+history| -- copy clipboard history
+clear| -- clear clipboard history
+disable| -- disable clipmenud (password mode)
+enable| -- enable clipmenud
+restart| -- restart/start clipmenud daemon
+stop| -- stop clipmenud daemon
+EOF
+}
+selected="$(mylist | column -s '|' -t | fzf --prompt="clipmenu: " | cut -d ' ' -f1)"
+[ -z "$selected" ] && exit
+case $selected in
+  history)
+    export CM_LAUNCHER=fzf
+    clipmenu
+    ;;
+  clear)
+    kill "$(pgrep -f clipmenud)"
+    rm -rf "$XDG_RUNTIME_DIR"/clipmenu.*
+    setsid "clipmenud" > /dev/null 2>&1 & disown
+    sleep 0.2
+    ;;
+  restart)
+    kill "$(pgrep -f clipmenud)"
+    setsid "clipmenud" > /dev/null 2>&1 & disown
+    sleep 0.2
+    ;;
+  stop)
+    kill "$(pgrep -f clipmenud)"
+    ;;
+  enable)
+    clipctl enable
+    ;;
+  disable)
+    clipctl disable
+    ;;
+esac
