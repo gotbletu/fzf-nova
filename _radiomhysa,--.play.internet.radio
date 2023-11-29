@@ -3,7 +3,7 @@
 #         https://www.youtube.com/user/gotbletu
 # desc:   fzf internet radio (use playerctl to control)
 # demo:   https://youtu.be/yfREdXs4H5o
-# depend: fzf coreutils util-linux mpv mpv-mpris
+# depend: fzf coreutils util-linux mpv mpv-mpris playerctl
 #         wget (for sample csvfile)
 # reff:   get more stations at:
 #         https://www.radiolineup.com/locate/Los-Angeles-CA
@@ -35,29 +35,15 @@ else
 fi
 
 export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
-mylist() {
-cat <<EOF
-play| -- play internet radio
-edit| -- add/edit radio station
-EOF
-}
-selected="$(mylist | column -s '|' -t | fzf --prompt="radiomhysa: " | cut -d ' ' -f1)"
+
+selected="$(sort -u "$csvfile" | fzf -d , --with-nth 1 \
+  --prompt="radiomhysa: " \
+  --bind "ctrl-o:execute:${EDITOR:-nano} $csvfile >/dev/tty" \
+  --bind 'ctrl-x:execute:playerctl --player=mpv stop' \
+  --bind "ctrl-r:reload:sort -u $csvfile" \
+  --header 'C-x:stop C-o:edit-file C-r:reload C-j/k/n/p|tab/shift-tab:navigate' \
+  )"
 [ -z "$selected" ] && exit
-case $selected in
-  play)
-    selected="$(sort -u "$csvfile" \
-      | fzf -d , --with-nth 1 --prompt="radiomhysa >>> select station: " \
-      | cut -d ',' -f2-\
-      )"
-    [ -z "$selected" ] && exit
-    setsid mpv --no-video "$selected" >/dev/null 2>&1 & disown
-    sleep 0.2
-    ;;
-  edit)
-    if [ "$TERM_PROGRAM" = tmux ]; then
-      tmux new-window -n "radiomhysa-edit" "$EDITOR $csvfile"
-    else
-      "$EDITOR" "$csvfile"
-    fi
-    ;;
-esac
+selected="$(echo "$selected" | cut -d ',' -f2-)"
+setsid mpv --no-video "$selected" >/dev/null 2>&1 & disown
+sleep 0.2

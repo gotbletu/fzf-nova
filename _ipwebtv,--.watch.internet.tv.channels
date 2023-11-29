@@ -2,7 +2,7 @@
 # author: gotbletu (@youtube|github|odysee)
 #         https://www.youtube.com/user/gotbletu
 # desc:   fzf open iptv channel to watch with mpv
-# demo:   https://youtu.be/P-A2sHCjqrw
+# demo:   https://odysee.com/@gotbletu:b/ipwebtv-watch-free-internet-tv-channels:3?r=3BeEtwB4Yw1JBZQDyp2EGW25c41greAh
 # depend: fzf coreutils util-linux awk wget mpv
 #         m3u2csv (https://github.com/Axel-Erfurt/m3uEdit/blob/main/m3u_to_csv.py)
 # reff:   https://database.freetuxtv.net/site/index
@@ -905,7 +905,7 @@ case $selected in
     convert2csv
     ;;
   channels)
-    selected="$( find "$mydir" -name '*.csv' | sort \
+    selected="$( find -L "$mydir" -name '*.csv' | sort \
       | fzf -d / --with-nth -1 --prompt="ipwebtv >>> pick a list: " --preview 'cat {}' \
       )"
     [ -z "$selected" ] && exit

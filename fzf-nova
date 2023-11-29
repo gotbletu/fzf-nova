@@ -24,7 +24,15 @@
 
 export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
 mydir="${0%/*}"
-selected="$(find "$mydir" -type f -name '_*' -exec basename {} \; | sort | sed 's@\.@ @g' | column -t -s ',' \
-  |  fzf -d '_' --with-nth='2..' --prompt="fzf-nova: " | cut -d ' ' -f1)"
-[ -z "$selected" ] && exit
-eval "${mydir}/${selected},*"
+if [ "$TERM_PROGRAM" = tmux ]; then
+  selected="$(find "$mydir" -type f -name '_*' -exec basename {} \; | sort | sed 's@\.@ @g' | column -t -s ',' \
+    |  fzf -d '_' --with-nth='2..' --prompt="fzf-nova: " | cut -d ' ' -f1)"
+  [ -z "$selected" ] && exit
+  eval "${mydir}/${selected},*"
+else
+  selected="$(find "$mydir" -type f -name '_*' -exec basename {} \; | sort | grep -v '_tmux_*' | sed 's@\.@ @g' | column -t -s ',' \
+    |  fzf -d '_' --with-nth='2..' --prompt="fzf-nova: " | cut -d ' ' -f1)"
+  [ -z "$selected" ] && exit
+  eval "${mydir}/${selected},*"
+fi
+
