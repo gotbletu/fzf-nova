@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   restore or empty trash bin files via fzf
+# depend: fzf coreutils util-linux glib2
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all'"
+selected="$( 
+  gio trash --list | column -t -s $'\t' | \
+  fzf -m -d / --with-nth 4.. --prompt="derez >>> restore file(s): " \
+  --bind "shift-delete:execute:gio trash --empty >/dev/tty" \
+  --bind "ctrl-r:reload:gio trash --list | column -t -s $'\t'" \
+  --header 'C-a:select-all C-d:deselect-all C-t:toggle-all C-r:reload S-del:empty C-j/k/n/p:navigate' \
+)"
+[ -z "$selected" ] && exit
+echo "$selected" | cut -d ' ' -f1 | while read -r line ; do gio trash --restore "$line" ; done

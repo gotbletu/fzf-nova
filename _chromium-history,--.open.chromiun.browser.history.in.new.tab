@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# author: junegunn choi (https://github.com/junegunn)
+# editby: gotbletu
+# desc:   fzf open chromium web history
+# depend: fzf chromium sed awk coreutils xdg-utils util-linux
+# reff:   http://web.archive.org/web/20220306071810/https://junegunn.kr/2015/04/browsing-chrome-history-with-fzf
+#         https://github.com/junegunn/fzf/wiki/examples#browsing-history
+
+export FZF_DEFAULT_OPTS="-e -i --info=default --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last'"
+cols=$(( COLUMNS / 3 ))
+sep='{::}'
+/usr/bin/cp -f ~/.config/chromium/Default/History /tmp/h
+selected="$(
+sqlite3 -separator $sep /tmp/h \
+  "select substr(title, 1, $cols), url
+   from urls order by last_visit_time desc" |
+awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+fzf --ansi -m --prompt="chromium-history >>> select url(s) to open: " | sed 's#.*\(https*://\)#\1#'
+)"
+[ -z "$selected" ] && exit
+echo "$selected" | while read -r line ; do setsid xdg-open "$line"; done
