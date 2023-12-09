@@ -15,6 +15,10 @@
     xfce4-terminal --title fzf-nova --geometry 120x20+350+300 --font 14 --execute bash -c "source ~/.bashrc &>/dev/null && fzf-nova"
     alacritty -T fzf-nova -o "window.dimensions.columns=90" "window.dimensions.lines=20" "window.position.x=350" "window.position.y=200" -e bash -c "source ~/.bashrc &>/dev/null && fzf-nova"
 
+#### for TMUX users (prefix + TAB to activate popup)
+    bind-key Tab capture-pane \; save-buffer /tmp/tmux-buffer \; delete-buffer \; display-popup -w 80% -h 60% -E "fzf-nova"
+    or
+    bind-key Tab capture-pane \; save-buffer /tmp/tmux-buffer \; delete-buffer \; display-popup -w 80% -h 60% -E "/path/to/fzf-nova"
 
 ### author
 - gotbletu (@youtube|github|odysee)

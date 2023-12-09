@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   variety wallpaper changer with fzf
+# depend: fzf variety coreutils util-linux findutils chafa
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index \
+--bind 'ctrl-x:execute:variety --pause 2>/dev/null >/dev/tty' \
+--bind 'ctrl-r:execute:variety --resume 2>/dev/null >/dev/tty' \
+--bind 'alt-n:execute:variety --next 2>/dev/null >/dev/tty' \
+--bind 'alt-p:execute:variety --previous 2>/dev/null >/dev/tty' \
+--bind 'alt-f:execute:variety --favorite 2>/dev/null >/dev/tty' \
+--bind 'shift-delete:execute:variety --trash 2>/dev/null >/dev/tty' \
+--bind 'shift-delete:execute:variety --trash 2>/dev/null >/dev/tty' \
+--bind 'home:first,end:last,tab:down,shift-tab:up' \
+--header 'C-x:pause C-r:resume A-n:next A-p:prev A-f:favorite S-Delete:trash C-j/k/n/p:navigate' \
+"
+
+mylist() {
+cat <<EOF
+next| -- next wallpaper
+previous| -- previous wallpaper
+trash| -- trash wallpaper
+pause| -- pause wallpaper
+resume| -- resume wallpaper
+favorite| -- copy current wallpaper to favorite
+set| -- set wallpaper
+EOF
+}
+selected="$(mylist | column -s '|' -t | fzf --prompt="variety: " | cut -d ' ' -f1)"
+[ -z "$selected" ] && exit
+case $selected in
+  next)
+    variety --next 2>/dev/null
+    ;;
+  previous)
+    variety --previous 2>/dev/null
+    ;;
+  trash)
+    variety --trash 2>/dev/null
+    ;;
+  pause)
+    variety --pause 2>/dev/null
+    ;;
+  resume)
+    variety --resume 2>/dev/null
+    ;;
+  favorite)
+    variety --favorite 2>/dev/null
+    ;;
+  set)
+    selected=$( (find ~/Pictures/Wallpapers -type f ; find ~/.config/variety/Favorites/ -type f) | \
+      fzf -d / --with-nth -2.. --prompt="variety: " --preview-window=right,70% --preview='chafa {}' )
+    [ -z "$selected" ] && exit
+    variety --set="$selected" 2>/dev/null
+    ;;
+esac
+
