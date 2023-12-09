@@ -63,7 +63,7 @@ export FZF_DEFAULT_OPTS="-e -i --layout=reverse --scroll-off=5 --tiebreak=index 
 --bind 'alt-n:execute:cmus-remote --next --play >/dev/tty' \
 --bind 'alt-p:execute:cmus-remote --prev --prev --play >/dev/tty' \
 --bind 'ctrl-r:execute:cmus-remote --clear --queue ; cmus-remote --queue \"\$(shuf -n 1 < ~/.cmus/lib.pl)\" ; cmus-remote --next --play >/dev/tty' \
---header 'C-x:playpause C-s:stop A-n:next A-p:prev C-r:random C-j/k/n/p:navigate' \
+--header 'C-x:playpause C-s:stop A-n:next A-p:prev C-r:random C-j/k/n/p:navigate'
 "
 selected="$(mylist | fzf --info=hidden --prompt="cmus: ")"
 

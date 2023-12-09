@@ -5,10 +5,9 @@
 # depend: fzf gawk coreutils xsel (or xclip, tmux, wl-copy ...etc)
 # reff:   https://github.com/Mange/rofi-emoji/blob/master/all_emojis.txt
 
-# shellcheck disable=SC1111
 # {{{ emoji
 mylist() {
-cat <<EOF
+cat <<'EOF'
 😀 Smileys & Emotion face-smiling grinning face face | grin | grinning face
 😃 Smileys & Emotion face-smiling grinning face with big eyes face | grinning face with big eyes | mouth | open | smile
 😄 Smileys & Emotion face-smiling grinning face with smiling eyes eye | face | grinning face with smiling eyes | mouth | open | smile

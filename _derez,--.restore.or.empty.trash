@@ -10,7 +10,7 @@ selected="$(
   fzf -m -d / --with-nth 4.. --prompt="derez >>> restore file(s): " \
   --bind "shift-delete:execute:gio trash --empty >/dev/tty" \
   --bind "ctrl-r:reload:gio trash --list | column -t -s $'\t'" \
-  --header 'C-a:select-all C-d:deselect-all C-t:toggle-all C-r:reload S-del:empty C-j/k/n/p:navigate' \
+  --header 'C-a:select-all C-d:deselect-all C-t:toggle-all C-r:reload S-del:empty C-j/k/n/p:navigate'
 )"
 [ -z "$selected" ] && exit
 echo "$selected" | cut -d ' ' -f1 | while read -r line ; do gio trash --restore "$line" ; done

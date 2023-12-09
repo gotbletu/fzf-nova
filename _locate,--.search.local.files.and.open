@@ -11,8 +11,7 @@
 #         2. Remove /media from PRUNEPATHS
 #         3. sudo updatedb
 
-# only search in /home and /media
-export FZF_DEFAULT_OPTS="-e -i --info=default --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last'"
+export FZF_DEFAULT_OPTS="-e -i --info=inline --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last' --header 'only searching /home and /media'"
 locate -ir '\(^/home\|^/media\)/.*' \
   | fzf -m --prompt="locate >>> select file(s) to open: " \
   |  while read -r line ; do setsid xdg-open "$line" ; done
