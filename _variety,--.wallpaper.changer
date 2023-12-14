@@ -13,7 +13,7 @@ export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --t
 --bind 'shift-delete:execute:variety --trash 2>/dev/null >/dev/tty' \
 --bind 'shift-delete:execute:variety --trash 2>/dev/null >/dev/tty' \
 --bind 'home:first,end:last,tab:down,shift-tab:up' \
---header 'C-x:pause C-r:resume A-n:next A-p:prev A-f:favorite S-Delete:trash C-j/k/n/p:navigate' \
+--header 'C-x:pause C-r:resume A-n:next A-p:prev A-f:favorite S-Delete:trash C-j/k/n/p:navigate'
 "
 
 mylist() {

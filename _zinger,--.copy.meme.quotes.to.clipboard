@@ -1,0 +1,45 @@
+#!/usr/bin/env sh
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   copy quotes/memes to clipboard via fzf
+# demo:   https://youtu.be/YGsq4ogwmBk
+# depend: fzf grep sed coreutils
+#         xsel (or xclip,wl-copy,tmux,clip,clipboard,pbcopy,termux-clipboard-set)
+#         nano (or vim,vi,nvim,micro,kak,helix,mcedit,emacs ...etc)
+
+myfile="$HOME/.config/zinger/zingers.txt"
+
+generate_example() {
+cat <<EOF > "$myfile"
+If Senzo Tanaka Is His Shidoshi, Then Show Us The Dim Mak ;; Movie Hollywood Bloodsport Black Dragon boys
+Rule Of Acquisition #1 Once You Have Their Money, You Never Give It Back. ;; TVShow Star Trek Deep Space Nine DS9 Ferengi
+Only Someone With The Sharingan And Kekkei Genkai Can Defeat Me ;; Anime Naruto Ninja Itachi Uchiha Vs Kakashi Hatake
+https://i.imgur.com/CGQJxHi.jpg ;; adblocker thug complains website goes down image meme ad revenue
+https://www.cnn.com/2013/05/22/tech/web/pronounce-gif/index.html ;; Animated Gif jif image pronounced pronunciation english dictionary word creator oxford
+This Is Your Last Chance. After This, There Is No Turning Back. ;; Movie Hollywood The Matrix Neo Morpheus
+EOF
+} 
+
+if [ ! -f "$myfile" ]; then
+  mkdir -p "$(dirname "$myfile")"
+  generate_example
+fi
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index"
+selected="$(grep -nvH '^[[:space:]]*$' "$myfile" \
+  | fzf --prompt "zinger: " --delimiter ':' --with-nth 3.. \
+  --bind "ctrl-r:reload:grep -nvH '^[[:space:]]*$' $myfile" \
+  --bind "ctrl-o:execute:${EDITOR:-nano} +{2} {1} >/dev/tty" \
+  --bind "ctrl-f:execute:${EDITOR:-nano} {1} >/dev/tty" \
+  --bind 'home:first,end:last,tab:down,shift-tab:up' \
+  --header 'C-o:edit-line C-f:edit-file C-r:reload C-j/k/n/p|tab/shift-tab:navigate' \
+  )"
+[ -z "$selected" ] && exit
+selected="$(echo "$selected" | cut -d ':' -f3-| sed -e s/\;\;\.\*\$// | sed 's/^[ \t]*//;s/[ \t]*$//')"
+printf %s "$selected" | xsel -b 2>/dev/null || printf %s "$selected" | xclip -selection clipboard -r 2>/dev/null
+printf %s "$selected" | wl-copy 2>/dev/null
+printf %s "$selected" | clip 2>/dev/null
+(printf %s "$selected" > /dev/clipboard) 2>/dev/null
+printf %s "$selected" | pbcopy 2>/dev/null
+printf %s "$selected" | termux-clipboard-set 2>/dev/null
+(printf %s "$selected" | tmux load-buffer -) 2>/dev/null
