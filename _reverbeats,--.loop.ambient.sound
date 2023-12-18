@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   play and loop ambient background noise sound files
+# demo:   https://youtu.be/eANLqIhOgWw
+# depend: fzf coreutils util-linux playerctl mpv mpv-mpris findutils
+# reff:   https://downloads.khinsider.com/game-soundtracks/album/x-men-vs.-street-fighter-1996
+#         https://www.chosic.com/free-music/sound-effects/
+#         https://www.storyblocks.com/audio/search/jingle-bells
+#         https://pixabay.com/music/search/lofi/
+#         https://pixabay.com/sound-effects/
+
+export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
+
+mydir="$HOME/.config/reverbeats"
+[ ! -d "$mydir" ] && mkdir -p "$mydir"
+
+selected="$(
+  find "$mydir" -type f | sort | \
+  fzf -d / --with-nth -2.. --prompt="reverbeats: "  \
+  --bind 'ctrl-x:execute:playerctl --player=mpv stop >/dev/null 2>&1' \
+  --bind "ctrl-r:execute:playerctl --player=mpv stop >/dev/null 2>&1 ; cd $mydir && setsid mpv --no-video --loop \
+  \"\$(find . -type f | shuf -n 1)\" >/dev/null 2>&1 & disown >/dev/tty" \
+  --header 'C-x:stop C-r:random C-j/k/n/p|tab/shift-tab:navigate'
+)"
+[ -z "$selected" ] && exit
+playerctl --player=mpv stop >/dev/null 2>&1
+setsid mpv --no-video --loop "$selected" >/dev/null 2>&1 & disown 
+sleep 0.2

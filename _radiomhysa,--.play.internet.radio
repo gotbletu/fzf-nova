@@ -41,7 +41,7 @@ selected="$(sort -u "$csvfile" | fzf -d , --with-nth 1 \
   --bind "ctrl-o:execute:${EDITOR:-nano} $csvfile >/dev/tty" \
   --bind 'ctrl-x:execute:playerctl --player=mpv stop' \
   --bind "ctrl-r:reload:sort -u $csvfile" \
-  --header 'C-x:stop C-o:edit-file C-r:reload C-j/k/n/p|tab/shift-tab:navigate' \
+  --header 'C-x:stop C-o:edit-file C-r:reload C-j/k/n/p|tab/shift-tab:navigate'
   )"
 [ -z "$selected" ] && exit
 selected="$(echo "$selected" | cut -d ',' -f2-)"
