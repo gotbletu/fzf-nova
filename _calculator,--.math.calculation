@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+# author: gotbletu (@youtube|github|odysee)
+#         https://www.youtube.com/user/gotbletu
+# desc:   commandline calculator
+# demo:   http://www.youtube.com/watch?v=JkyodHenTuc
+# depend: coreutils python (or bc)
+
+pycalcmsg() {
+cat <<EOF
+>>> basic:          1+1 2-6 3*5 4/8
+>>> remainder:      10%3
+>>> orderof:        50+2*8/(10*5)
+>>> exponents(^):   10**2
+>>> squareroot:     sqrt(49)
+>>> othermath:      help('math')
+>>> press Tab to autocomplete math functions
+>>> $(python -V) calculator (ctrl+d to exit)
+EOF
+}
+
+bccalcmsg() {
+cat <<EOF
+>>> basic:          1+1 2-6 3*5 4/8
+>>> orderof:        50/(10*5)
+>>> exponents(^):   10^2
+>>> squareroot:     sqrt(49)
+>>> bc calculator (press ctrl+c to exit)
+EOF
+}
+
+if command -v python3 >/dev/null; then
+  pycalcmsg
+  python3 -ic "from math import *; import cmath"
+elif command -v python2 >/dev/null; then
+  pycalcmsg
+  python2 -ic "from __future__ import division; from math import *; from random import *"
+elif command -v bc >/dev/null; then
+  bccalcmsg
+  bc -q -l
+else
+  echo "install python or bc"
+  exit 1
+fi
