@@ -20,6 +20,16 @@
     or
     bind-key Tab capture-pane \; save-buffer /tmp/tmux-buffer \; delete-buffer \; display-popup -w 80% -h 60% -E "/path/to/fzf-nova"
 
+#### add your own script
+- just drop in a script in the same folder as fzf-nova.
+- name it e.g: _myamazingscript,--.a.cool.description
+
+#### showcase
+- radiomhysa:       https://youtu.be/yfREdXs4H5o
+- clipmenu:         https://youtu.be/9-4boJ9krsY
+- zinger:           https://youtu.be/YGsq4ogwmBk
+- reverbeats:       https://youtu.be/eANLqIhOgWw
+
 ### author
 - gotbletu (@youtube|github|odysee)
 - https://www.youtube.com/user/gotbletu

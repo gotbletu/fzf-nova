@@ -3,8 +3,7 @@
 #         https://www.youtube.com/user/gotbletu
 # desc:   fzf internet radio (use playerctl to control)
 # demo:   https://youtu.be/yfREdXs4H5o
-# depend: fzf coreutils util-linux mpv mpv-mpris playerctl
-#         wget (for sample csvfile)
+# depend: fzf coreutils util-linux grep sed mpv mpv-mpris playerctl
 # reff:   get more stations at:
 #         https://www.radiolineup.com/locate/Los-Angeles-CA
 #         https://onlineradiobox.com/us/ktwv
@@ -24,26 +23,91 @@
 # playerctl --player=mpv position 5-           # Shift-F9 = seek/rewind (mpv)
 # playerctl --player=mpv position 5+           # Shift-F10 = seek/forward (mpv)
 
-# use pyradio csv if exist, else mkdir and download sample station.csv file
+generate_example() {
+cat <<'EOF' > "$myfile"
+[Classical] |Zeno| Mozart,https://zeno.fm/radio/mozart/
+[Classical] |Zeno| Beethoven,https://zeno.fm/radio/beethoven/
+[Pop] |Zeno| Hits 80s 90s Radio,https://zeno.fm/radio/hits80s90s/
+[Pop] |Zeno| 90s Hits Circuito Dance,https://zeno.fm/radio/90s_HITS/
+{FM 094.7} <KTWV> [Urban Adult Contemporary] (English) The Wave 94.7 FM,https://live.amperwave.net/manifest/audacy-ktwvfmaac-hlsc.m3u8
+{FM 102.7} <KIIS> [Top 40 Contemporary] (English) 102.7 KIIS FM,https://ample.revma.ihrhls.com/zc185/34_nbf03dzxgz6e02/playlist.m3u8
+{FM 105.9} <KPWR> [HipHop] (English) Power 106,https://18703.live.streamtheworld.com/KPWRAAC.aac
+Alternative (BAGeL Radio),https://ais-sa3.cdnstream1.com/2606_128.aac
+American Roots (Boot Liquor - SomaFM),http://somafm.com/bootliquor.pls
+Celtic (ThistleRadio - SomaFM),http://somafm.com/thistle.pls
+Chillout (Groove Salad - SomaFM),http://somafm.com/startstream=groovesalad.pls
+Groove Salad Classic (Early 2000s Ambient),https://somafm.com/gsclassic.pls
+n5MD Radio (Ambient and Experimental),https://somafm.com/n5md.pls
+Vaporwaves [SomaFM],https://somafm.com/vaporwaves.pls
+EOF
+} 
+
+# use pyradio csv if exist
 if [ -f "$HOME/.config/pyradio/stations.csv" ]; then
-  csvfile="$HOME/.config/pyradio/stations.csv"
+  myfile="$HOME/.config/pyradio/stations.csv"
 elif [ -f "$HOME/.config/radiomhysa/stations.csv" ]; then
-  csvfile="$HOME/.config/radiomhysa/stations.csv"
+  myfile="$HOME/.config/radiomhysa/stations.csv"
 else
-  wget -P ~/.config/radiomhysa https://raw.githubusercontent.com/coderholic/pyradio/master/pyradio/stations.csv
-  csvfile="$HOME/.config/radiomhysa/stations.csv"
+  myfile="$HOME/.config/radiomhysa/stations.csv"
+  if [ ! -f "$myfile" ]; then
+    mkdir -p "$(dirname "$myfile")"
+    generate_example
+  fi
 fi
 
 export FZF_DEFAULT_OPTS="-e -i --info=hidden --layout=reverse --scroll-off=5 --tiebreak=index --bind 'home:first,end:last,tab:down,shift-tab:up'"
 
-selected="$(sort -u "$csvfile" | fzf -d , --with-nth 1 \
-  --prompt="radiomhysa: " \
-  --bind "ctrl-o:execute:${EDITOR:-nano} $csvfile >/dev/tty" \
-  --bind 'ctrl-x:execute:playerctl --player=mpv stop' \
-  --bind "ctrl-r:reload:sort -u $csvfile" \
-  --header 'C-x:stop C-o:edit-file C-r:reload C-j/k/n/p|tab/shift-tab:navigate'
-  )"
-[ -z "$selected" ] && exit
-selected="$(echo "$selected" | cut -d ',' -f2-)"
-setsid mpv --no-video "$selected" >/dev/null 2>&1 & disown
-sleep 0.2
+mytui() {
+  selected="$( grep -nH , "$myfile" | sed -e 's/:/,/' -e 's/:/,/' | \
+    fzf -d , --with-nth -2 \
+    --prompt="radiomhysa: " \
+    --bind "ctrl-o:execute:${EDITOR:-nano} +{2} {1} >/dev/tty" \
+    --bind "ctrl-f:execute:${EDITOR:-nano} {1} >/dev/tty" \
+    --bind 'ctrl-x:execute:playerctl --player=mpv stop >/dev/null 2>&1' \
+    --bind "ctrl-r:reload:grep -nH , $myfile | sed -e 's/:/,/' -e 's/:/,/'" \
+    --header 'C-x:stop C-o:edit-line C-f:edit-file C-r:reload C-j/k/n/p|tab/shift-tab:navigate'
+    )"
+  [ -z "$selected" ] && exit
+  selected="$(echo "$selected" | cut -d ',' -f4)"
+  playerctl --player=mpv stop >/dev/null 2>&1
+  setsid mpv --no-video "$selected" >/dev/null 2>&1 & disown
+  sleep 0.2
+}
+
+helpmsg() {
+cat <<EOF
+desc:   radiomhysa - play internet radio
+demo:   https://youtu.be/yfREdXs4H5o
+depend: fzf coreutils util-linux grep sed mpv mpv-mpris playerctl
+
+usage: ${0##*/} <options>
+
+options:
+                        No argument then start fzf TUI
+  -l, --list            List all stream
+  -e, --edit            Edit radio list
+  -s, --search          Search keyword
+  -h, --help            Show help page
+
+example:
+  ${0##*/}
+  ${0##*/} -s keyword
+
+EOF
+}
+
+if [ "$1" = -h ] || [ "$1" = --help ]; then
+  helpmsg
+  exit 0
+elif [ -z "$1" ]; then
+  mytui
+elif [ "$1" = -l ] || [ "$1" = --list ]; then
+  cat "$myfile"
+elif [ "$1" = -e ] || [ "$1" = --edit ]; then
+  "$EDITOR" "$myfile"
+elif [ "$1" = -s ] || [ "$1" = --search ]; then
+  grep --color=auto -in "$2" -- "$myfile" 2>/dev/null
+else
+  helpmsg
+  exit 1
+fi
