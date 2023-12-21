@@ -20,6 +20,24 @@
     or
     bind-key Tab capture-pane \; save-buffer /tmp/tmux-buffer \; delete-buffer \; display-popup -w 80% -h 60% -E "/path/to/fzf-nova"
 
+
+#### for SHELL hotkey (e.g Alt+m to activate)
+    # bashrc
+    bind -x '"\em": fzf-nova'
+    or
+    bind -x '"\em": path/to/fzf-nova'
+
+    # zshrc
+    __fzf_nova__() {
+      fzf-nova
+      # or
+      # /path/to/fzf-nova
+    }
+    zle     -N             __fzf_nova__
+    bindkey -M emacs '^[m' __fzf_nova__
+    bindkey -M vicmd '^[m' __fzf_nova__
+    bindkey -M viins '^[m' __fzf_nova__
+
 #### add your own script
 - just drop in a script in the same folder as fzf-nova.
 - name it e.g: _myamazingscript,--.a.cool.description
@@ -29,6 +47,7 @@
 - clipmenu:         https://youtu.be/9-4boJ9krsY
 - zinger:           https://youtu.be/YGsq4ogwmBk
 - reverbeats:       https://youtu.be/eANLqIhOgWw
+- ipwebtv:          [@odysee](https://odysee.com/@gotbletu:b/ipwebtv-watch-free-internet-tv-channels:3?r=3BeEtwB4Yw1JBZQDyp2EGW25c41greAh)
 
 ### author
 - gotbletu (@youtube|github|odysee)
