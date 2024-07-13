@@ -43,6 +43,7 @@
 - name it e.g: _myamazingscript,--.a.cool.description
 
 #### showcase
+- notekami:         https://youtu.be/qwpK4rqAZwA
 - radiomhysa:       https://youtu.be/yfREdXs4H5o
 - clipmenu:         https://youtu.be/9-4boJ9krsY
 - zinger:           https://youtu.be/YGsq4ogwmBk
